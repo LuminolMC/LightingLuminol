@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: MrHua269 <novau233@163.com>
 Date: Sun, 14 Jan 2024 11:03:38 +0000
-Subject: [PATCH] Basement patches from dirtymolia
+Subject: [PATCH] Fix incorrect thread check in CraftWorld
 
 
 diff --git a/src/main/java/ca/spottedleaf/concurrentutil/scheduler/SchedulerThreadPool.java b/src/main/java/ca/spottedleaf/concurrentutil/scheduler/SchedulerThreadPool.java
@@ -1937,18 +1937,19 @@ index 5deea790023cb2a1b852f143680e746fa5f817d1..0f0642bf9f11303ffe6bdb446ba0d1c4
  
          this.worlds.remove(world.getName().toLowerCase(java.util.Locale.ENGLISH));
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e884cd0a49 100644
+index 2aa03157d4272233db762bf4d1c716ea6cb3085d..dbaeef1c418a8be5cbac9b1de02cf8db71ee7f53 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-@@ -5,7 +5,6 @@ import com.google.common.base.Predicates;
+@@ -5,7 +5,7 @@ import com.google.common.base.Predicates;
  import com.google.common.collect.ImmutableList;
  import com.google.common.collect.ImmutableMap;
  import com.mojang.datafixers.util.Pair;
 -import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
++import io.papermc.paper.threadedregions.RegionizedServer;
  import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
  import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
  import java.io.File;
-@@ -20,7 +19,6 @@ import java.util.Objects;
+@@ -20,7 +20,6 @@ import java.util.Objects;
  import java.util.Random;
  import java.util.Set;
  import java.util.UUID;
@@ -1956,7 +1957,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
  import java.util.function.Consumer;
  import java.util.function.Predicate;
  import java.util.stream.Collectors;
-@@ -120,7 +118,6 @@ import org.bukkit.entity.TippedArrow;
+@@ -120,7 +119,6 @@ import org.bukkit.entity.TippedArrow;
  import org.bukkit.entity.Trident;
  import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
  import org.bukkit.event.weather.LightningStrikeEvent;
@@ -1964,7 +1965,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
  import org.bukkit.event.world.TimeSkipEvent;
  import org.bukkit.generator.BiomeProvider;
  import org.bukkit.generator.BlockPopulator;
-@@ -140,6 +137,7 @@ import org.bukkit.util.RayTraceResult;
+@@ -140,6 +138,7 @@ import org.bukkit.util.RayTraceResult;
  import org.bukkit.util.StructureSearchResult;
  import org.bukkit.util.Vector;
  import org.jetbrains.annotations.NotNull;
@@ -1972,7 +1973,29 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
  
  public class CraftWorld extends CraftRegionAccessor implements World {
      public static final int CUSTOM_DIMENSION_OFFSET = 10;
-@@ -811,7 +809,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -378,7 +377,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+     @Override
+     public boolean isChunkGenerated(int x, int z) {
+         // Paper start - Fix this method
+-        if (!io.papermc.paper.util.TickThread.isTickThreadFor(this.getHandle(), x, z)) { // Folia - region threading
++        if (!io.papermc.paper.util.TickThread.isTickThreadFor(this.getHandle(), x, z) && !RegionizedServer.isGlobalTickThread()) { // Folia - region threading
+             return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                 return CraftWorld.this.isChunkGenerated(x, z);
+             }, (run) -> { io.papermc.paper.threadedregions.RegionizedServer.getInstance().taskQueue.queueChunkTask(this.getHandle(), x, z, run);}).join(); // Folia - region threading
+@@ -488,7 +487,11 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+                 },
+                 list
+             );
+-            serverChunkCache.mainThreadProcessor.managedBlock(future::isDone);
++            if (!RegionizedServer.isGlobalTickThread()) {
++                serverChunkCache.mainThreadProcessor.managedBlock(future::isDone);
++            }else{
++                future.join();
++            }
+             if (chunkStatus == ChunkStatus.NOISE) {
+                 future.join().left().ifPresent(chunk -> net.minecraft.world.level.levelgen.Heightmap.primeHeightmaps(chunk, ChunkStatus.POST_FEATURES));
+             }
+@@ -811,7 +814,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate) {
          io.papermc.paper.util.TickThread.ensureTickThread(this.world, loc.getX(), loc.getZ(), "Cannot generate tree asynchronously"); // Folia - region threading
@@ -1981,7 +2004,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          worldData.captureTreeGeneration = true; // Folia - region threading
          worldData.captureBlockStates = true; // Folia - region threading
          boolean grownTree = this.generateTree(loc, type);
-@@ -863,7 +861,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -863,7 +866,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setTime(long time) {
@@ -1990,7 +2013,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          long margin = (time - this.getFullTime()) % 24000;
          if (margin < 0) margin += 24000;
          this.setFullTime(this.getFullTime() + margin);
-@@ -876,7 +874,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -876,7 +879,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setFullTime(long time) {
@@ -1999,7 +2022,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          // Notify anyone who's listening
          TimeSkipEvent event = new TimeSkipEvent(this, TimeSkipEvent.SkipReason.CUSTOM, time - this.world.getDayTime());
          this.server.getPluginManager().callEvent(event);
-@@ -1381,7 +1379,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1381,7 +1384,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setStorm(boolean hasStorm) {
@@ -2008,7 +2031,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.world.serverLevelData.setRaining(hasStorm, org.bukkit.event.weather.WeatherChangeEvent.Cause.PLUGIN); // Paper
          this.setWeatherDuration(0); // Reset weather duration (legacy behaviour)
          this.setClearWeatherDuration(0); // Reset clear weather duration (reset "/weather clear" commands)
-@@ -1394,7 +1392,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1394,7 +1397,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setWeatherDuration(int duration) {
@@ -2017,7 +2040,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.world.serverLevelData.setRainTime(duration);
      }
  
-@@ -1405,7 +1403,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1405,7 +1408,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setThundering(boolean thundering) {
@@ -2026,7 +2049,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.world.serverLevelData.setThundering(thundering, org.bukkit.event.weather.ThunderChangeEvent.Cause.PLUGIN); // Paper
          this.setThunderDuration(0); // Reset weather duration (legacy behaviour)
          this.setClearWeatherDuration(0); // Reset clear weather duration (reset "/weather clear" commands)
-@@ -1418,7 +1416,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1418,7 +1421,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setThunderDuration(int duration) {
@@ -2035,7 +2058,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.world.serverLevelData.setThunderTime(duration);
      }
  
-@@ -1429,7 +1427,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1429,7 +1432,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setClearWeatherDuration(int duration) {
@@ -2044,7 +2067,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.world.serverLevelData.setClearWeatherTime(duration);
      }
  
-@@ -1624,7 +1622,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1624,7 +1627,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setKeepSpawnInMemory(boolean keepLoaded) {
@@ -2053,7 +2076,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          // Paper start - Configurable spawn radius
          if (keepLoaded == this.world.keepSpawnInMemory) {
              // do nothing, nothing has changed
-@@ -1703,7 +1701,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1703,7 +1706,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setHardcore(boolean hardcore) {
@@ -2062,7 +2085,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.world.serverLevelData.settings.hardcore = hardcore;
      }
  
-@@ -1716,7 +1714,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1716,7 +1719,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setTicksPerAnimalSpawns(int ticksPerAnimalSpawns) {
@@ -2071,7 +2094,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setTicksPerSpawns(SpawnCategory.ANIMAL, ticksPerAnimalSpawns);
      }
  
-@@ -1729,7 +1727,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1729,7 +1732,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setTicksPerMonsterSpawns(int ticksPerMonsterSpawns) {
@@ -2080,7 +2103,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setTicksPerSpawns(SpawnCategory.MONSTER, ticksPerMonsterSpawns);
      }
  
-@@ -1742,7 +1740,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1742,7 +1745,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setTicksPerWaterSpawns(int ticksPerWaterSpawns) {
@@ -2089,7 +2112,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setTicksPerSpawns(SpawnCategory.WATER_ANIMAL, ticksPerWaterSpawns);
      }
  
-@@ -1755,7 +1753,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1755,7 +1758,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setTicksPerWaterAmbientSpawns(int ticksPerWaterAmbientSpawns) {
@@ -2098,7 +2121,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setTicksPerSpawns(SpawnCategory.WATER_AMBIENT, ticksPerWaterAmbientSpawns);
      }
  
-@@ -1768,7 +1766,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1768,7 +1771,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setTicksPerWaterUndergroundCreatureSpawns(int ticksPerWaterUndergroundCreatureSpawns) {
@@ -2107,7 +2130,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setTicksPerSpawns(SpawnCategory.WATER_UNDERGROUND_CREATURE, ticksPerWaterUndergroundCreatureSpawns);
      }
  
-@@ -1781,13 +1779,13 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1781,13 +1784,13 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setTicksPerAmbientSpawns(int ticksPerAmbientSpawns) {
@@ -2123,7 +2146,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          Preconditions.checkArgument(spawnCategory != null, "SpawnCategory cannot be null");
          Preconditions.checkArgument(CraftSpawnCategory.isValidForLimits(spawnCategory), "SpawnCategory.%s are not supported", spawnCategory);
  
-@@ -1804,25 +1802,25 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1804,25 +1807,25 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
@@ -2153,7 +2176,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.server.getWorldMetadata().removeMetadata(this, metadataKey, owningPlugin);
      }
  
-@@ -1835,7 +1833,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1835,7 +1838,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setMonsterSpawnLimit(int limit) {
@@ -2162,7 +2185,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setSpawnLimit(SpawnCategory.MONSTER, limit);
      }
  
-@@ -1848,7 +1846,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1848,7 +1851,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setAnimalSpawnLimit(int limit) {
@@ -2171,7 +2194,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setSpawnLimit(SpawnCategory.ANIMAL, limit);
      }
  
-@@ -1861,7 +1859,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1861,7 +1864,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setWaterAnimalSpawnLimit(int limit) {
@@ -2180,7 +2203,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setSpawnLimit(SpawnCategory.WATER_ANIMAL, limit);
      }
  
-@@ -1874,7 +1872,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1874,7 +1877,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setWaterAmbientSpawnLimit(int limit) {
@@ -2189,7 +2212,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setSpawnLimit(SpawnCategory.WATER_AMBIENT, limit);
      }
  
-@@ -1887,7 +1885,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1887,7 +1890,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setWaterUndergroundCreatureSpawnLimit(int limit) {
@@ -2198,7 +2221,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setSpawnLimit(SpawnCategory.WATER_UNDERGROUND_CREATURE, limit);
      }
  
-@@ -1900,7 +1898,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1900,7 +1903,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
      @Override
      @Deprecated
      public void setAmbientSpawnLimit(int limit) {
@@ -2207,7 +2230,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          this.setSpawnLimit(SpawnCategory.AMBIENT, limit);
      }
  
-@@ -1923,7 +1921,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -1923,7 +1926,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public void setSpawnLimit(SpawnCategory spawnCategory, int limit) {
@@ -2216,7 +2239,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          Preconditions.checkArgument(spawnCategory != null, "SpawnCategory cannot be null");
          Preconditions.checkArgument(CraftSpawnCategory.isValidForLimits(spawnCategory), "SpawnCategory.%s are not supported", spawnCategory);
  
-@@ -2107,7 +2105,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -2107,7 +2110,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public boolean setGameRuleValue(String rule, String value) {
@@ -2225,7 +2248,7 @@ index 2aa03157d4272233db762bf4d1c716ea6cb3085d..af1156f8cf0d242681d28de7103023e8
          // No null values allowed
          if (rule == null || value == null) return false;
  
-@@ -2150,7 +2148,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+@@ -2150,7 +2153,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
  
      @Override
      public <T> boolean setGameRule(GameRule<T> rule, T newValue) {
