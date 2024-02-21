@@ -299,7 +299,7 @@ index bebaa4e7abcbd01dc57fddf2a473b846e887cc7f..3fbab41868c90ff64223a3a271b2fdd5
          ((DedicatedServer)MinecraftServer.getServer()).handleConsoleInputs();
  
 diff --git a/src/main/java/io/papermc/paper/threadedregions/RegionizedWorldData.java b/src/main/java/io/papermc/paper/threadedregions/RegionizedWorldData.java
-index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec26a548c0b 100644
+index e91df1496889b15041a297f243d7cfe7c78f1f6c..7b5ccf9576a0d4a67a56b9c6976614c9060a4594 100644
 --- a/src/main/java/io/papermc/paper/threadedregions/RegionizedWorldData.java
 +++ b/src/main/java/io/papermc/paper/threadedregions/RegionizedWorldData.java
 @@ -3,6 +3,9 @@ package io.papermc.paper.threadedregions;
@@ -322,7 +322,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
  import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
  import net.minecraft.CrashReport;
  import net.minecraft.ReportedException;
-@@ -89,10 +94,10 @@ public final class RegionizedWorldData {
+@@ -91,10 +96,10 @@ public final class RegionizedWorldData {
              for (final Entity entity : from.toProcessTrackingUnloading) {
                  into.toProcessTrackingUnloading.add(entity);
              }
@@ -335,7 +335,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
                  into.navigatingMobs.add(iterator.next());
              }
              // block ticking
-@@ -310,7 +315,7 @@ public final class RegionizedWorldData {
+@@ -312,7 +317,7 @@ public final class RegionizedWorldData {
      private RegionizedServer.WorldLevelData tickData;
  
      // connections
@@ -344,7 +344,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
  
      // misc. fields
      private boolean isHandlingTick;
-@@ -324,12 +329,12 @@ public final class RegionizedWorldData {
+@@ -326,12 +331,12 @@ public final class RegionizedWorldData {
      }
  
      // entities
@@ -359,7 +359,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      private final IteratorSafeOrderedReferenceSet<Mob> navigatingMobs = new IteratorSafeOrderedReferenceSet<>();
  
      // block ticking
-@@ -338,8 +343,8 @@ public final class RegionizedWorldData {
+@@ -340,8 +345,8 @@ public final class RegionizedWorldData {
      private final LevelTicks<Fluid> fluidLevelTicks;
  
      // tile entity ticking
@@ -370,7 +370,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      private boolean tickingBlockEntities;
  
      // time
-@@ -376,8 +381,8 @@ public final class RegionizedWorldData {
+@@ -378,8 +383,8 @@ public final class RegionizedWorldData {
      public boolean preventPoiUpdated = false; // CraftBukkit - SPIGOT-5710
      public boolean captureBlockStates = false;
      public boolean captureTreeGeneration = false;
@@ -381,7 +381,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      public List<ItemEntity> captureDrops;
      // Paper start
      public int wakeupInactiveRemainingAnimals;
-@@ -482,7 +487,7 @@ public final class RegionizedWorldData {
+@@ -489,7 +494,7 @@ public final class RegionizedWorldData {
          this.hasEntityMoveEvent = io.papermc.paper.event.entity.EntityMoveEvent.getHandlerList().getRegisteredListeners().length > 0; // Paper
          this.skipHopperEvents = this.world.paperConfig().hopper.disableMoveEvent || org.bukkit.event.inventory.InventoryMoveItemEvent.getHandlerList().getRegisteredListeners().length == 0; // Paper
          // always subtract from server init so that the tick starts at zero, allowing us to cast to int without much worry
@@ -390,7 +390,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      }
  
      public NearbyPlayers getNearbyPlayers() {
-@@ -587,11 +592,8 @@ public final class RegionizedWorldData {
+@@ -594,11 +599,8 @@ public final class RegionizedWorldData {
      }
  
      public void addEntityTickingEntity(final Entity entity) {
@@ -403,7 +403,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      }
  
      public boolean hasEntityTickingEntity(final Entity entity) {
-@@ -599,11 +601,8 @@ public final class RegionizedWorldData {
+@@ -606,11 +608,8 @@ public final class RegionizedWorldData {
      }
  
      public void removeEntityTickingEntity(final Entity entity) {
@@ -416,7 +416,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      }
  
      public void forEachTickingEntity(final Consumer<Entity> action) {
-@@ -618,15 +617,12 @@ public final class RegionizedWorldData {
+@@ -625,15 +624,12 @@ public final class RegionizedWorldData {
      }
  
      public void addEntity(final Entity entity) {
@@ -433,7 +433,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
          }
      }
  
-@@ -635,34 +631,25 @@ public final class RegionizedWorldData {
+@@ -642,34 +638,25 @@ public final class RegionizedWorldData {
      }
  
      public void removeEntity(final Entity entity) {
@@ -471,7 +471,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      }
  
      // block ticking hooks
-@@ -735,12 +722,12 @@ public final class RegionizedWorldData {
+@@ -742,12 +729,12 @@ public final class RegionizedWorldData {
      // ticking chunks
      public void addEntityTickingChunk(final LevelChunk levelChunk) {
          this.entityTickingChunks.add(levelChunk);
@@ -486,7 +486,7 @@ index 7ca275826609bcf96f103a8c50beaa47c3b4068b..f752db02ecdf7370559fbe703b7abec2
      }
  
      public IteratorSafeOrderedReferenceSet<LevelChunk> getEntityTickingChunks() {
-@@ -763,12 +750,12 @@ public final class RegionizedWorldData {
+@@ -770,12 +757,12 @@ public final class RegionizedWorldData {
  
      public void addChunk(final LevelChunk levelChunk) {
          this.chunks.add(levelChunk);
@@ -1391,7 +1391,7 @@ index 74483543836d9ed042cc7b9cbbde8d58d6994475..e3fecedf153e21a7842faf037393974b
                  this.level.timings.syncChunkLoad.stopTiming(); // Paper
              } // Paper
 diff --git a/src/main/java/net/minecraft/server/level/ServerLevel.java b/src/main/java/net/minecraft/server/level/ServerLevel.java
-index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a79643351 100644
+index f3f095e6acbe50154503524b160255394f4d9ec6..0c125e482a1e98a580b3b0bcedb86bc9cea8076b 100644
 --- a/src/main/java/net/minecraft/server/level/ServerLevel.java
 +++ b/src/main/java/net/minecraft/server/level/ServerLevel.java
 @@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
@@ -1402,7 +1402,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
  import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
  import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
  import it.unimi.dsi.fastutil.longs.LongSet;
-@@ -1878,8 +1879,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -1877,8 +1878,9 @@ public class ServerLevel extends Level implements WorldGenLevel {
          } else {
              if (entity instanceof net.minecraft.world.entity.item.ItemEntity itemEntity && itemEntity.getItem().isEmpty()) return false; // Paper - Prevent empty items from being added
              // Paper start - capture all item additions to the world
@@ -1414,7 +1414,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
                  return true;
              }
              // Paper end - capture all item additions to the world
-@@ -2036,25 +2038,30 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -2035,25 +2037,30 @@ public class ServerLevel extends Level implements WorldGenLevel {
  
          if (Shapes.joinIsNotEmpty(voxelshape, voxelshape1, BooleanOp.NOT_SAME)) {
              List<PathNavigation> list = new ObjectArrayList();
@@ -1462,7 +1462,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
                  }
              }
  
-@@ -2077,23 +2084,24 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -2076,23 +2083,24 @@ public class ServerLevel extends Level implements WorldGenLevel {
  
      @Override
      public void updateNeighborsAt(BlockPos pos, Block sourceBlock) {
@@ -1492,7 +1492,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
      }
  
      @Override
-@@ -2139,7 +2147,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -2138,7 +2146,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
  
      @Override
      public void blockEvent(BlockPos pos, Block block, int type, int data) {
@@ -1501,7 +1501,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
      }
  
      private void runBlockEvents() {
-@@ -2728,7 +2736,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -2727,7 +2735,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
      public void blockUpdated(BlockPos pos, Block block) {
          if (!this.isDebug()) {
              // CraftBukkit start
@@ -1510,7 +1510,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
                  return;
              }
              // CraftBukkit end
-@@ -2943,11 +2951,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -2942,11 +2950,11 @@ public class ServerLevel extends Level implements WorldGenLevel {
  
          public void onTickingStart(Entity entity) {
              if (entity instanceof net.minecraft.world.entity.Marker && !paperConfig().entities.markers.tick) return; // Paper - Configurable marker ticking
@@ -1524,7 +1524,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
              // Paper start - Reset pearls when they stop being ticked
              if (paperConfig().fixes.disableUnloadedChunkEnderpearlExploit && entity instanceof net.minecraft.world.entity.projectile.ThrownEnderpearl pearl) {
                  pearl.cachedOwner = null;
-@@ -2958,7 +2966,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -2957,7 +2965,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
  
          public void onTrackingStart(Entity entity) {
              org.spigotmc.AsyncCatcher.catchOp("entity register"); // Spigot
@@ -1534,7 +1534,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
              // ServerLevel.this.getChunkSource().addEntity(entity); // Paper - ignore and warn about illegal addEntity calls instead of crashing server; moved down below valid=true
              if (entity instanceof ServerPlayer) {
                  ServerPlayer entityplayer = (ServerPlayer) entity;
-@@ -2976,7 +2985,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -2975,7 +2984,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
                      Util.logAndPauseIfInIde("onTrackingStart called during navigation iteration", new IllegalStateException("onTrackingStart called during navigation iteration"));
                  }
  
@@ -1543,7 +1543,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
              }
  
              if (entity instanceof EnderDragon) {
-@@ -3011,7 +3020,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -3010,7 +3019,8 @@ public class ServerLevel extends Level implements WorldGenLevel {
  
          public void onTrackingEnd(Entity entity) {
              org.spigotmc.AsyncCatcher.catchOp("entity unregister"); // Spigot
@@ -1553,7 +1553,7 @@ index 33154e89457e3d7331c6d17785544d08f7e6bed8..22eb21193b8eba0ebfd9eb2f768cac4a
              // Spigot start
              if ( entity instanceof Player )
              {
-@@ -3073,7 +3083,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
+@@ -3072,7 +3082,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
                      Util.logAndPauseIfInIde("onTrackingStart called during navigation iteration", new IllegalStateException("onTrackingStart called during navigation iteration"));
                  }
  
