@@ -188,7 +188,7 @@ index 5bef4f50082e56b89239cfd62dd7429926b71c09..2d70632ccbc55f58c4a3ad8d39eeaa07
      }
  
 diff --git a/src/main/java/io/papermc/paper/chunk/system/scheduling/ChunkHolderManager.java b/src/main/java/io/papermc/paper/chunk/system/scheduling/ChunkHolderManager.java
-index a4157bc24c36c63502667d69910108a50114f370..e112bbb3860bf5cca09d19e16e5dea359cbdba33 100644
+index 0d8b2a4127e8c8e4970d220b8a2240490da6e7df..5eeda811ca67731b802f8d5b52cb76930a7802a1 100644
 --- a/src/main/java/io/papermc/paper/chunk/system/scheduling/ChunkHolderManager.java
 +++ b/src/main/java/io/papermc/paper/chunk/system/scheduling/ChunkHolderManager.java
 @@ -35,6 +35,7 @@ import net.minecraft.server.level.TicketType;
@@ -1206,7 +1206,7 @@ index bee5d0a0516fbae4f550c0a77fcca6afcff8675f..27c1c080f6ffa25f16f4923b0c87f889
                  // CraftBukkit end
  
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 13ad20b3d43cc22ad1046220b24272dd274de997..e7aa23ef1f05337664a1f2ee5301634df15dd59d 100644
+index df7e9b02c24053b02ef05b38474ec1862ddff30c..f1644ce77c27656658014eebed88ec33b31a4fc9 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -3,9 +3,6 @@ package net.minecraft.server;
@@ -1263,7 +1263,7 @@ index 13ad20b3d43cc22ad1046220b24272dd274de997..e7aa23ef1f05337664a1f2ee5301634d
      protected WorldData worldData;
      private volatile boolean isSaving;
  
-@@ -2196,7 +2189,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -2195,7 +2188,8 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
      }
  
      public int getTickCount() {
@@ -1273,7 +1273,7 @@ index 13ad20b3d43cc22ad1046220b24272dd274de997..e7aa23ef1f05337664a1f2ee5301634d
      }
  
      public int getSpawnProtectionRadius() {
-@@ -2329,7 +2323,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -2328,7 +2322,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
  
              Objects.requireNonNull(this.packRepository);
              return stream.<Pack>map(resourcepackrepository::getPack).filter(Objects::nonNull).map(Pack::open).collect(ImmutableList.toImmutableList()); // CraftBukkit - decompile error // Paper - decompile error // todo: is this needed anymore?
@@ -1282,7 +1282,7 @@ index 13ad20b3d43cc22ad1046220b24272dd274de997..e7aa23ef1f05337664a1f2ee5301634d
              MultiPackResourceManager resourcemanager = new MultiPackResourceManager(PackType.SERVER_DATA, immutablelist);
  
              return ReloadableServerResources.loadResources(resourcemanager, iregistrycustom_dimension, this.worldData.enabledFeatures(), this.isDedicatedServer() ? Commands.CommandSelection.DEDICATED : Commands.CommandSelection.INTEGRATED, this.getFunctionCompilationLevel(), this.executor, this).whenComplete((datapackresources, throwable) -> {
-@@ -2351,9 +2345,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -2350,9 +2344,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              this.resources.managers.updateRegistryTags(this.registryAccess());
              net.minecraft.world.item.alchemy.PotionBrewing.reload(); // Paper - Custom Potion Mixes
              // Paper start
@@ -1292,7 +1292,7 @@ index 13ad20b3d43cc22ad1046220b24272dd274de997..e7aa23ef1f05337664a1f2ee5301634d
              // this.getPlayerList().saveAll(); // Paper - we don't need to save everything, just advancements
              for (ServerPlayer player : this.getPlayerList().getPlayers()) {
                  player.getAdvancements().save();
-@@ -2366,11 +2357,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -2365,11 +2356,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              new io.papermc.paper.event.server.ServerResourcesReloadedEvent(cause).callEvent(); // Paper - Add ServerResourcesReloadedEvent; fire after everything has been reloaded
          }, this);
  
@@ -1305,7 +1305,7 @@ index 13ad20b3d43cc22ad1046220b24272dd274de997..e7aa23ef1f05337664a1f2ee5301634d
      }
  
 diff --git a/src/main/java/net/minecraft/server/level/ChunkMap.java b/src/main/java/net/minecraft/server/level/ChunkMap.java
-index 2fc86eb396ed600154840dd6cd43b9294a34595c..e6ab849b077c367df36378e41aedba64931f60d2 100644
+index 1ef9d716c6c1523c0ee1cb6fd484e2a8ca367adc..a930a11ec7ab013dec8b4c61bcf75781c1786931 100644
 --- a/src/main/java/net/minecraft/server/level/ChunkMap.java
 +++ b/src/main/java/net/minecraft/server/level/ChunkMap.java
 @@ -52,6 +52,8 @@ import java.util.function.IntFunction;
@@ -1662,7 +1662,7 @@ index d175f13ada111bcee977957c6fd9580e032183e9..39a639007caf6bb6a01c2596f50d89bb
                      passengerTree.restore();
                      passengerTree.adjustRiders(true);
 diff --git a/src/main/java/net/minecraft/world/entity/LivingEntity.java b/src/main/java/net/minecraft/world/entity/LivingEntity.java
-index 7ae3d5a9e44092501271b36e593fe6d7270c472b..870370e754bcf22aa4904de62331f7e3240a39eb 100644
+index bd3f1a6447ae59400a18456ea2c2f2fdb24a3f91..bf39a1c83a7ae6c0ac47aa9929348842a1cb53b6 100644
 --- a/src/main/java/net/minecraft/world/entity/LivingEntity.java
 +++ b/src/main/java/net/minecraft/world/entity/LivingEntity.java
 @@ -3553,7 +3553,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
@@ -1696,10 +1696,10 @@ index c366da764e2e11018460430595c14b17480c6da7..c79d86e590ef90be025ce9b78f1e8f48
              loadedTick = currentTick;
              loadedThisTick = 0;
 diff --git a/src/main/java/net/minecraft/world/level/Explosion.java b/src/main/java/net/minecraft/world/level/Explosion.java
-index 57d072f20d6a3b3fc86d542c7953ed6517ea2e6c..436380327783dc7e3f827a85d30e453c36b5ef9b 100644
+index 409d71c9c659e0417d85d544f35f2279b6d8d399..d3e92c882f8b540d2959d0cade77cafbf00ff3e4 100644
 --- a/src/main/java/net/minecraft/world/level/Explosion.java
 +++ b/src/main/java/net/minecraft/world/level/Explosion.java
-@@ -860,7 +860,7 @@ public class Explosion {
+@@ -870,7 +870,7 @@ public class Explosion {
          if (!this.level.paperConfig().environment.optimizeExplosions) {
              return this.getSeenFraction(vec3d, entity, blockCache, blockPos); // Paper - optimise explosions
          }

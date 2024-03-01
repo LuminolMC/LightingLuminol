@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: MrHua269 <novau233@163.com>
+Date: Fri, 1 Mar 2024 14:59:07 +0000
+Subject: [PATCH] Fix java compile and updated upstream
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index cd4e721b581300f44ae00516c25c4d87004daae5..aed5e492d236a267e8a7280820bab2935ea81fd9 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -385,7 +385,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+     @Override
+     public boolean isChunkGenerated(int x, int z) {
+         // Paper start - Fix this method
+-        if (!io.papermc.paper.util.TickThread.isTickThreadFor(this.getHandle(), x, z) && !RegionizedServer.isGlobalTickThread()) { // Folia - region threading
++        if (!io.papermc.paper.util.TickThread.isTickThreadFor(this.getHandle(), x, z) && !io.papermc.paper.threadedregions.RegionizedServer.isGlobalTickThread()) { // Folia - region threading
+             return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                 return CraftWorld.this.isChunkGenerated(x, z);
+             }, (run) -> { io.papermc.paper.threadedregions.RegionizedServer.getInstance().taskQueue.queueChunkTask(this.getHandle(), x, z, run);}).join(); // Folia - region threading
+@@ -495,7 +495,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+                 },
+                 list
+             );
+-            if (!RegionizedServer.isGlobalTickThread()) {
++            if (!io.papermc.paper.threadedregions.RegionizedServer.isGlobalTickThread()) {
+                 serverChunkCache.mainThreadProcessor.managedBlock(future::isDone);
+             }else{
+                 future.join();
