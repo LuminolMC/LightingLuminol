@@ -44,13 +44,13 @@ jobs:
         name: Artifacts
         path: build/libs/
     - name: Rename jar file
-      run: mv build/libs/Luminol-paperclip-1.20.4-R0.1-SNAPSHOT-reobf.jar build/libs/luminol-1.20.4-paperclip.jar
+      run: mv build/libs/LightingLuminol-paperclip-1.20.4-R0.1-SNAPSHOT-reobf.jar build/libs/lightingluminol-1.20.4-paperclip.jar
     - name: Release Artifacts
       uses: svenstaro/upload-release-action@v2
       with:
-       release_name: "Luminol MC1.20.4 - ${{ github.event.repository.updated_at}}"
+       release_name: "LightingLuminol MC1.20.4 - ${{ github.event.repository.updated_at}}"
        tag: "1.20.4-${{ github.run_id }}"
        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-       file: "build/libs/luminol-1.20.4-paperclip.jar"
+       file: "build/libs/lightingluminol-1.20.4-paperclip.jar"
        file_glob: true
        prerelease: false    
