@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: MrHua269 <novau233@163.com>
+Date: Sat, 2 Mar 2024 12:38:37 +0000
+Subject: [PATCH] Disable thread check if the polling thread is global region
+
+
+diff --git a/src/main/java/net/minecraft/server/level/ServerChunkCache.java b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
+index 313db44c6045cd9710f965010234849c69dcf6e8..5c78254fcd983c9979890f0f22290e2bdf415e2c 100644
+--- a/src/main/java/net/minecraft/server/level/ServerChunkCache.java
++++ b/src/main/java/net/minecraft/server/level/ServerChunkCache.java
+@@ -885,8 +885,10 @@ public class ServerChunkCache extends ChunkSource {
+         // CraftBukkit start - process pending Chunk loadCallback() and unloadCallback() after each run task
+         public boolean pollTask() {
+             // Folia start - region threading
+-            if (ServerChunkCache.this.level != io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentRegionizedWorldData().world) {
+-                throw new IllegalStateException("Polling tasks from non-owned region");
++            if (!RegionizedServer.isGlobalTickThread()){
++                if (ServerChunkCache.this.level != io.papermc.paper.threadedregions.TickRegionScheduler.getCurrentRegionizedWorldData().world) {
++                    throw new IllegalStateException("Polling tasks from non-owned region");
++                }
+             }
+             // Folia end - region threading
+             if (ServerChunkCache.this.runDistanceManagerUpdates()) {
