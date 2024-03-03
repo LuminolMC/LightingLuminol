@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: MrHua269 <novau233@163.com>
+Date: Sun, 3 Mar 2024 09:51:12 +0000
+Subject: [PATCH] Fix incorrect chunk pos shifting in WorldDataPool
+
+
+diff --git a/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java b/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java
+index cebd86d0523f815a6b076dbfa5b6dd229c35005c..87955f4453ab2200312f5cb84e8e435b32b01ef1 100644
+--- a/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java
++++ b/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java
+@@ -43,7 +43,7 @@ public class WorldDataPool {
+ 
+     @Nullable
+     public RegionizedWorldData getDataAnyThread(int chunkX,int chunkZ,Level level){
+-        return this.getDataAnyThreadUnsafe(((ServerLevel) level),4 << chunkX,4 << chunkZ);
++        return this.getDataAnyThreadUnsafe(((ServerLevel) level),chunkX >> 4, chunkZ >> 4);
+     }
+ 
+ 
