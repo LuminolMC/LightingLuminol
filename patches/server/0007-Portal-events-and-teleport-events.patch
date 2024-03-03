@@ -1,0 +1,78 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: MrHua269 <novau233@163.com>
+Date: Sun, 3 Mar 2024 05:21:55 +0000
+Subject: [PATCH] Portal events and teleport events
+
+
+diff --git a/src/main/java/net/minecraft/world/entity/Entity.java b/src/main/java/net/minecraft/world/entity/Entity.java
+index 39a639007caf6bb6a01c2596f50d89bb3a247e4b..cab13753742f98d790cfad10db5273d85f9cb047 100644
+--- a/src/main/java/net/minecraft/world/entity/Entity.java
++++ b/src/main/java/net/minecraft/world/entity/Entity.java
+@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
+ import com.google.common.collect.Sets;
+ import com.google.common.collect.UnmodifiableIterator;
+ import com.mojang.logging.LogUtils;
++import io.papermc.paper.util.MCUtil;
+ import io.papermc.paper.util.TickThread;
+ import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
+ import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+@@ -128,6 +129,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
+ import net.minecraft.world.scores.PlayerTeam;
+ import net.minecraft.world.scores.ScoreHolder;
+ import net.minecraft.world.scores.Team;
++import org.bukkit.event.player.PlayerPortalEvent;
+ import org.joml.Vector3f;
+ import org.slf4j.Logger;
+ import org.bukkit.Bukkit;
+@@ -4012,7 +4014,15 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
+         if (!this.canTeleportAsync()) {
+             return false;
+         }
+-        this.getBukkitEntity(); // force bukkit entity to be created before TPing
++
++        final org.bukkit.entity.Entity bukkitEntity = this.getBukkitEntity(); // force bukkit entity to be created before TPing
++
++        if (!this.preventMoving && this instanceof ServerPlayer) {
++            if (!new PlayerTeleportEvent((org.bukkit.entity.Player) bukkitEntity,bukkitEntity.getLocation(), MCUtil.toLocation(destination,pos)).callEvent()){
++                return false;
++            }
++        }
++
+         if ((teleportFlags & TELEPORT_FLAG_UNMOUNT) == 0L) {
+             for (Entity entity : this.getIndirectPassengers()) {
+                 if (!entity.canTeleportAsync()) {
+@@ -4446,6 +4456,21 @@ public abstract class Entity implements Nameable, EntityAccess, CommandSource, S
+                 // we just have to abandon this teleport to prevent duplication
+                 return;
+             }
++
++            if (this instanceof ServerPlayer){
++                final org.bukkit.entity.Player bukkitPlayer = ((ServerPlayer) this).getBukkitEntity();
++                PlayerTeleportEvent.TeleportCause cause = PlayerTeleportEvent.TeleportCause.UNKNOWN;
++
++                switch (type){
++                    case END -> cause = PlayerTeleportEvent.TeleportCause.END_PORTAL;
++                    case NETHER -> cause = PlayerTeleportEvent.TeleportCause.NETHER_PORTAL;
++                }
++
++                final PlayerPortalEvent eventWrapped = new PlayerPortalEvent(bukkitPlayer,MCUtil.toLocation(originWorld,initialPosition),MCUtil.toLocation(destination,info.pos),cause,0,true, 0);
++                eventWrapped.callEvent();
++                info.pos = MCUtil.toVec3(eventWrapped.getTo());
++            }
++
+             originWorld.chunkSource.removeTicketAtLevel(
+                 TicketType.TELEPORT_HOLD_TICKET, initialPositionChunk,
+                 io.papermc.paper.chunk.system.scheduling.ChunkHolderManager.MAX_TICKET_LEVEL,
+diff --git a/src/main/java/net/minecraft/world/level/portal/PortalInfo.java b/src/main/java/net/minecraft/world/level/portal/PortalInfo.java
+index 34c0d9fe03cc834e949889f9c4f8269206c18040..4953371d205a1c3982a29252a51dcc99b1f5e99a 100644
+--- a/src/main/java/net/minecraft/world/level/portal/PortalInfo.java
++++ b/src/main/java/net/minecraft/world/level/portal/PortalInfo.java
+@@ -7,7 +7,7 @@ import org.bukkit.craftbukkit.event.CraftPortalEvent;
+ 
+ public class PortalInfo {
+ 
+-    public final Vec3 pos;
++    public Vec3 pos;
+     public final Vec3 speed;
+     public final float yRot;
+     public final float xRot;
