@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: MrHua269 <novau233@163.com>
+Date: Sat, 16 Mar 2024 12:30:01 +0000
+Subject: [PATCH] Fix incorrect shifting
+
+
+diff --git a/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java b/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java
+index 87955f4453ab2200312f5cb84e8e435b32b01ef1..f79c5096844d526a352468ffb01e0afca5fff519 100644
+--- a/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java
++++ b/src/main/java/me/earthme/lightingluminol/pool/WorldDataPool.java
+@@ -43,7 +43,7 @@ public class WorldDataPool {
+ 
+     @Nullable
+     public RegionizedWorldData getDataAnyThread(int chunkX,int chunkZ,Level level){
+-        return this.getDataAnyThreadUnsafe(((ServerLevel) level),chunkX >> 4, chunkZ >> 4);
++        return this.getDataAnyThreadUnsafe(((ServerLevel) level),chunkX << 4, chunkZ << 4);
+     }
+ 
+ 
+diff --git a/src/main/java/net/minecraft/server/level/ThreadedLevelLightEngine.java b/src/main/java/net/minecraft/server/level/ThreadedLevelLightEngine.java
+index 92d61b242128cde0989a720adfb28ebd738a6c1f..3390fb56d3ab917181b9bdd65a08a2e7518214e4 100644
+--- a/src/main/java/net/minecraft/server/level/ThreadedLevelLightEngine.java
++++ b/src/main/java/net/minecraft/server/level/ThreadedLevelLightEngine.java
+@@ -174,13 +174,14 @@ public class ThreadedLevelLightEngine extends LevelLightEngine implements AutoCl
+         updateFuture.onComplete.thenAccept((final Void ignore) -> {
+             RegionizedServer.getInstance().taskQueue.queueTickTaskQueue(
+                 this.chunkMap.level, chunkX, chunkZ, () -> {
+-                    final int newReferences = Level.WORLD_DATA_POOL.getDataAnyThread(chunkX,chunkZ,this.chunkMap.level).chunksBeingWorkedOn.get(key);
++                    var got = Level.WORLD_DATA_POOL.getDataAnyThread(chunkX,chunkZ,this.chunkMap.level);
++                    final int newReferences = got.chunksBeingWorkedOn.get(key);
+                     if (newReferences == 1) {
+-                        Level.WORLD_DATA_POOL.getDataAnyThread(chunkX,chunkZ, this.chunkMap.level).chunksBeingWorkedOn.remove(key);
++                        got.chunksBeingWorkedOn.remove(key);
+                         final ChunkPos pos = new ChunkPos(chunkX, chunkZ);
+                         world.getChunkSource().removeRegionTicket(StarLightInterface.CHUNK_WORK_TICKET, pos, 0, pos);
+                     } else {
+-                        Level.WORLD_DATA_POOL.getDataAnyThread(chunkX,chunkZ, this.chunkMap.level).chunksBeingWorkedOn.put(key, newReferences - 1);
++                        got.chunksBeingWorkedOn.put(key, newReferences - 1);
+                     }
+                 }
+             );
