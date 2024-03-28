@@ -48,7 +48,7 @@ For maven
 
 QQ群：`368632360` | QQ频道：[点击加入](https://pd.qq.com/s/eq9krf9j) | Telegram:[点击加入](https://t.me/LuminolMC)
 
-> [!WARNING] 注意
+> [!WARNING]
 > **此项目与Leaves无关。不要向Leaves报告任何有关协议支持的错误，因为协议支持已经重构**
 
 ## 关于 Issue
