@@ -9,7 +9,7 @@
 ![Commit Activity](https://img.shields.io/github/commit-activity/w/LuminolMC/LightingLuminol?style=flat-square)
 ![GitHub all releases](https://img.shields.io/github/downloads/LuminolMC/LightingLuminol/total?style=flat-square)
 
-[English](./README_EN) | **中文**
+[English](./README_EN.md) | **中文**
 
 ## 特性
  - 支持部分Bukkit插件
@@ -20,7 +20,7 @@
  - 更多的插件开发API支持（进行中）
 
 ## 下载
-任何版本都可以在 [Release](https://github.com/LuminolMC/LightingLuminol/releases), 中找到，你也可以通过[以下步骤](./README#构建)自己构建。
+任何版本都可以在 [Release](https://github.com/LuminolMC/LightingLuminol/releases), 中找到，你也可以通过[以下步骤](./README.md#构建)自己构建。
 
 ## 构建
 要构建一个paperclip jar，你需要运行以下命令。你可以在build/libs中找到jar（注意：需要`JDK17`）

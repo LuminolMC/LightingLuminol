@@ -9,7 +9,7 @@
 ![Commit Activity](https://img.shields.io/github/commit-activity/w/LuminolMC/LightingLuminol?style=flat-square)
 ![GitHub all releases](https://img.shields.io/github/downloads/LuminolMC/LightingLuminol/total?style=flat-square)
 
-**English** | [中文](./README)
+**English** | [中文](./README.md)
 
 ## Features
  - Supported some Bukkit plugin
@@ -20,7 +20,7 @@
  - More API support for plugin development (W.I.P)
 
 ## Download
-Any versions are available in the [release](https://github.com/LuminolMC/LightingLuminol/releases), also you can build it by yourself through [the following steps](.README_EN#Build).
+Any versions are available in the [release](https://github.com/LuminolMC/LightingLuminol/releases), also you can build it by yourself through [the following steps](.README_EN.md#Build).
 
 ## Build
 To build a paperclip jar, you need to run the following command. You can find the jar in build/libs(Note: JDK17 is needed)
