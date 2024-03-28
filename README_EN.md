@@ -2,7 +2,7 @@
 
 # LightingLuminol
 
-<h4>LightingLuminol is a folia fork from Luminol and with many useful optimizations, configurable vanilla features, and more API supports, and it was designed for survival and anarchy servers</h4>
+<h4>LightingLuminol is a Luminol fork with many useful optimizations, configurable vanilla features, and more API supports, aims to run more bukkit plugins on folia</h4>
 
 [![MIT License](https://img.shields.io/github/license/LuminolMC/LightingLuminol?style=flat-square)](LICENSE)
 [![Issues](https://img.shields.io/github/issues/LuminolMC/LightingLuminol?style=flat-square)](https://github.com/LuminolMC/Luminol/issues)
@@ -48,7 +48,7 @@ For maven
 
 QQ Group: `368632360` | QQ Channel: [Click To Join](https://pd.qq.com/s/eq9krf9j) | Telegram: [Click To Join](https://t.me/LuminolMC)
 
-> [!WARNING] Notice
+> [!WARNING]
 > **This project is not related to Leaves.Do not report any bugs about protocol support to leaves because the protocol supports are already refactored.**
 
 ## About Issue

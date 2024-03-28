@@ -2,7 +2,7 @@
 
 # LightingLuminol
 
-<h4>LightingLuminol 是一个基于Folia的分支，具有许多有用的优化、可配置的原版特性和更多的API支持，它专为生存和无政府服务器设计</h4>
+<h4>LightingLuminol 是一个基于Luminol的分支，具有许多有用的优化、可配置的原版特性和更多的API支持，目标是在Folia上运行更多Bukkit插件</h4>
 
 [![MIT License](https://img.shields.io/github/license/LuminolMC/LightingLuminol?style=flat-square)](LICENSE)
 [![Issues](https://img.shields.io/github/issues/LuminolMC/LightingLuminol?style=flat-square)](https://github.com/LuminolMC/Luminol/issues)
@@ -46,7 +46,7 @@ For maven
 ## 联系方式
 > 如果您对这个项目感兴趣或有任何问题，请随时向我们提问。
 
-QQ群：`368632360` | QQ频道：[点击加入](https://pd.qq.com/s/eq9krf9j) | Telegram:[点击加入](https://t.me/LuminolMC)
+QQ群：`368632360` | QQ频道：[点击加入](https://pd.qq.com/s/eq9krf9j) | Telegram：[点击加入](https://t.me/LuminolMC)
 
 > [!WARNING]
 > **此项目与Leaves无关。不要向Leaves报告任何有关协议支持的错误，因为协议支持已经重构**
